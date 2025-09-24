@@ -2,6 +2,6 @@
 project_id        = "jenkins-terraform-demo-472920"
 region            = "us-central1"
 zone              = "us-central1-a"
-credentials_file  = "C:\\Users\\scarlet.e.silva\\.gcp\\jenkins-terraform-demo-472920-bc8f093d161c.json"
+credentials_file  = " "
 network           = "jenkins-network"
 subnetwork        = "jenkins-subnet"
