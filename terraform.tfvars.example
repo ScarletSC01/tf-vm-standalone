@@ -1,5 +1,5 @@
 
-project_id        = "jenkins-terraform-demo-472920"
+project_id        = "My/proyect/id"
 region            = "us-central1"
 zone              = "us-central1-a"
 credentials_file  = " "
