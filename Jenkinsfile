@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        TF_VERSION = "1.7.0"
         TF_CMD = "/usr/local/bin/terraform"
-        GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-service-account') // Configura esto en Jenkins
+        GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-service-account') // Credencial en Jenkins
+        SSH_KEY_PATH = "id_rsa.pub"
     }
 
     parameters {
@@ -22,16 +22,29 @@ pipeline {
             }
         }
 
+        stage('Generate SSH Key if Missing') {
+            steps {
+                script {
+                    if (!fileExists(SSH_KEY_PATH)) {
+                        sh '''
+                        ssh-keygen -t rsa -b 2048 -f id_rsa -q -N ""
+                        '''
+                    }
+                }
+            }
+        }
+
         stage('Generate terraform.tfvars') {
             steps {
                 script {
-                    sh """
-                    echo 'project_id       = "jenkins-terraform-demo-472920"'  > terraform.tfvars
-                    echo 'region           = "us-central1"'                  >> terraform.tfvars
-                    echo 'zone             = "us-central1-a"'                >> terraform.tfvars
-                    echo 'network          = "jenkins-network"'              >> terraform.tfvars
-                    echo 'subnetwork       = "jenkins-subnet"'               >> terraform.tfvars
-                    echo 'credentials_file = "${GOOGLE_APPLICATION_CREDENTIALS}"' >> terraform.tfvars
+                    writeFile file: 'terraform.tfvars', text: """
+                        project_id       = "jenkins-terraform-demo-472920"
+                        region           = "us-central1"
+                        zone             = "us-central1-a"
+                        network          = "jenkins-network"
+                        subnetwork       = "jenkins-subnet"
+                        credentials_file = "${GOOGLE_APPLICATION_CREDENTIALS}"
+                        public_key       = "${SSH_KEY_PATH}"
                     """
                 }
             }
