@@ -32,9 +32,10 @@ resource "google_compute_instance" "vm_example" {
     access_config {}
   }
 
-  metadata = {
-    ssh-keys = "user:${file("~/.ssh/id_rsa.pub")}"
-  }
+ metadata = {
+  ssh-keys = "user:${file("id_rsa.pub")}"
+}
+
 
   tags = ["jenkins-vm"]
 }
