@@ -1,0 +1,18 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*.backup
+.terraform.lock.hcl
+
+# Variables sensibles
+terraform.tfvars
+terraform.tfvars.json
+
+# Archivos de editor
+.vscode/
+.idea/
+*.log
