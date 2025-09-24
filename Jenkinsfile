@@ -2,21 +2,16 @@ pipeline {
     agent any
 
     parameters {
-        choice(
-            name: 'ACTION',
-            choices: ['plan', 'apply', 'destroy'],
-            description: 'Seleccione acción de Terraform'
-        )
+        choice(name: 'ACTION', choices: ['plan', 'apply', 'destroy'], description: 'Seleccione acción de Terraform')
     }
 
     environment {
-        // Nombre de las credenciales subidas a Jenkins (tipo "Secret file")
         GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-service-account')
-        TF_VAR_project_id   = 'jenkins-terraform-demo-472920'
-        TF_VAR_region       = 'us-central1'
-        TF_VAR_zone         = 'us-central1-a'
-        TF_VAR_network      = 'jenkins-network'
-        TF_VAR_subnetwork   = 'jenkins-subnet'
+        TF_VAR_project_id  = 'jenkins-terraform-demo-472920'
+        TF_VAR_region      = 'us-central1'
+        TF_VAR_zone        = 'us-central1-a'
+        TF_VAR_network     = 'jenkins-network'
+        TF_VAR_subnetwork  = 'jenkins-subnet'
     }
 
     stages {
@@ -26,13 +21,25 @@ pipeline {
             }
         }
 
+        stage('Generate terraform.tfvars') {
+            steps {
+                sh '''
+                echo "project_id  = \\"${TF_VAR_project_id}\\""  > terraform.tfvars
+                echo "region      = \\"${TF_VAR_region}\\""     >> terraform.tfvars
+                echo "zone        = \\"${TF_VAR_zone}\\""       >> terraform.tfvars
+                echo "network     = \\"${TF_VAR_network}\\""    >> terraform.tfvars
+                echo "subnetwork  = \\"${TF_VAR_subnetwork}\\"" >> terraform.tfvars
+                '''
+            }
+        }
+
         stage('Terraform Init') {
             steps {
                 sh '/usr/local/bin/terraform init'
             }
         }
 
-        stage('Terraform ${params.ACTION}') {
+        stage('Terraform Action') {
             steps {
                 script {
                     if (params.ACTION == 'plan') {
@@ -48,11 +55,12 @@ pipeline {
     }
 
     post {
-        success {
-            echo "¡Terraform ${params.ACTION} ejecutado con éxito!"
-        }
         failure {
             echo "Ocurrió un error durante la ejecución de Terraform."
         }
+        success {
+            echo "Terraform ejecutado exitosamente con la acción: ${params.ACTION}"
+        }
     }
 }
+
