@@ -1,17 +1,18 @@
 pipeline {
     agent any
 
-    parameters {
-        choice(name: 'ACTION', choices: ['plan', 'apply', 'destroy'], description: 'Seleccione acción de Terraform')
+    environment {
+        TF_VERSION = "1.7.0"
+        TF_CMD = "/usr/local/bin/terraform"
+        GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-service-account') // Configura esto en Jenkins
     }
 
-    environment {
-        GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-service-account')
-        TF_VAR_project_id  = 'jenkins-terraform-demo-472920'
-        TF_VAR_region      = 'us-central1'
-        TF_VAR_zone        = 'us-central1-a'
-        TF_VAR_network     = 'jenkins-network'
-        TF_VAR_subnetwork  = 'jenkins-subnet'
+    parameters {
+        choice(
+            name: 'ACTION',
+            choices: ['plan', 'apply', 'destroy'],
+            description: 'Seleccione acción de Terraform'
+        )
     }
 
     stages {
@@ -23,19 +24,22 @@ pipeline {
 
         stage('Generate terraform.tfvars') {
             steps {
-                sh '''
-                echo "project_id  = \\"${TF_VAR_project_id}\\""  > terraform.tfvars
-                echo "region      = \\"${TF_VAR_region}\\""     >> terraform.tfvars
-                echo "zone        = \\"${TF_VAR_zone}\\""       >> terraform.tfvars
-                echo "network     = \\"${TF_VAR_network}\\""    >> terraform.tfvars
-                echo "subnetwork  = \\"${TF_VAR_subnetwork}\\"" >> terraform.tfvars
-                '''
+                script {
+                    sh """
+                    echo 'project_id       = "jenkins-terraform-demo-472920"'  > terraform.tfvars
+                    echo 'region           = "us-central1"'                  >> terraform.tfvars
+                    echo 'zone             = "us-central1-a"'                >> terraform.tfvars
+                    echo 'network          = "jenkins-network"'              >> terraform.tfvars
+                    echo 'subnetwork       = "jenkins-subnet"'               >> terraform.tfvars
+                    echo 'credentials_file = "${GOOGLE_APPLICATION_CREDENTIALS}"' >> terraform.tfvars
+                    """
+                }
             }
         }
 
         stage('Terraform Init') {
             steps {
-                sh '/usr/local/bin/terraform init'
+                sh "${TF_CMD} init"
             }
         }
 
@@ -43,11 +47,11 @@ pipeline {
             steps {
                 script {
                     if (params.ACTION == 'plan') {
-                        sh '/usr/local/bin/terraform plan -var-file=terraform.tfvars'
+                        sh "${TF_CMD} plan -var-file=terraform.tfvars"
                     } else if (params.ACTION == 'apply') {
-                        sh '/usr/local/bin/terraform apply -auto-approve -var-file=terraform.tfvars'
+                        sh "${TF_CMD} apply -auto-approve -var-file=terraform.tfvars"
                     } else if (params.ACTION == 'destroy') {
-                        sh '/usr/local/bin/terraform destroy -auto-approve -var-file=terraform.tfvars'
+                        sh "${TF_CMD} destroy -auto-approve -var-file=terraform.tfvars"
                     }
                 }
             }
@@ -55,12 +59,11 @@ pipeline {
     }
 
     post {
-        failure {
-            echo "Ocurrió un error durante la ejecución de Terraform."
-        }
         success {
-            echo "Terraform ejecutado exitosamente con la acción: ${params.ACTION}"
+            echo "Pipeline completado correctamente ✅"
+        }
+        failure {
+            echo "Ocurrió un error durante la ejecución de Terraform ❌"
         }
     }
 }
-
