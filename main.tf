@@ -14,47 +14,6 @@ provider "google" {
   credentials = file(var.credentials_file)
 }
 
-# -----------------------------
-# Variables necesarias
-# -----------------------------
-variable "project_id" {
-  description = "ID del proyecto en GCP"
-  type        = string
-}
-
-variable "region" {
-  description = "Región donde se crean los recursos"
-  type        = string
-}
-
-variable "zone" {
-  description = "Zona donde se crean los recursos"
-  type        = string
-}
-
-variable "network" {
-  description = "Nombre de la red"
-  type        = string
-}
-
-variable "subnetwork" {
-  description = "Nombre de la subred"
-  type        = string
-}
-
-variable "credentials_file" {
-  description = "Ruta del archivo de credenciales de GCP"
-  type        = string
-}
-
-variable "public_key" {
-  description = "Ruta del archivo con la clave pública SSH"
-  type        = string
-}
-
-# -----------------------------
-# Recurso: VM en GCP
-# -----------------------------
 resource "google_compute_instance" "vm_example" {
   name         = "vm-jenkins-secondary"
   machine_type = "e2-medium"
@@ -73,11 +32,9 @@ resource "google_compute_instance" "vm_example" {
     access_config {}
   }
 
-  # Se parametriza la clave pública
   metadata = {
-    ssh-keys = "user:${file(var.public_key)}"
+    ssh-keys = "user=${var.public_key}"
   }
 
   tags = ["jenkins-vm"]
 }
-
