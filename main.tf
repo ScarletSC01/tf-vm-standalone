@@ -13,6 +13,21 @@ provider "google" {
   region      = var.region
   credentials = file(var.credentials_file)
 }
+variable "network" {
+  description = "Nombre de la red de GCP"
+  type        = string
+}
+
+variable "subnetwork" {
+  description = "Nombre de la subred de GCP"
+  type        = string
+}
+
+variable "image" {
+  description = "Imagen del sistema operativo para la VM"
+  type        = string
+}
+
 
 resource "google_compute_instance" "vm_example" {
   name         = "vm-jenkins-secondary"
