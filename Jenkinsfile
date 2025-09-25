@@ -19,6 +19,11 @@ pipeline {
                 sh '/usr/local/bin/terraform init'
             }
         }
+stage('Terraform Import VM') {
+    steps {
+        sh 'terraform import google_compute_instance.vm_example projects/jenkins-terraform-demo-472920/zones/us-central1-a/instances/vm-jenkins-secondary || true'
+    }
+}
 
         stage('Terraform Plan') {
             steps {
