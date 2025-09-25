@@ -38,3 +38,8 @@ resource "google_compute_instance" "vm_example" {
 
   tags = ["jenkins-vm"]
 }
+variable "public_key" {
+  description = "Clave pública SSH para acceder a la VM"
+  type        = string
+}
+
