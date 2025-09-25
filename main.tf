@@ -33,6 +33,7 @@ resource "google_compute_instance" "vm_example" {
   name         = "vm-jenkins-secondary"
   machine_type = "n1-standard-2"
   zone         = var.zone
+  allow_stopping_for_update = true 
 
   boot_disk {
     initialize_params {
