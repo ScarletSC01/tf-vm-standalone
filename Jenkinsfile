@@ -2,24 +2,15 @@ pipeline {
     agent any
 
     environment {
-        GOOGLE_APPLICATION_CREDENTIALS = '/var/lib/jenkins/keys/jenkins-terraform.json'
+        // Ruta al JSON de credenciales de GCP en la VM
+        GOOGLE_CREDENTIALS = '/var/lib/jenkins/gcp/credentials.json'
     }
 
     stages {
-
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/ScarletSC01/tf-vm-standalone.git'
-            }
-        }
-
-        stage('Generate SSH Key if Missing') {
-            steps {
-                script {
-                    if (!fileExists("${env.HOME}/.ssh/id_rsa")) {
-                        sh 'ssh-keygen -t rsa -b 2048 -f ${HOME}/.ssh/id_rsa -N ""'
-                    }
-                }
+                git branch: 'main',
+                    url: 'https://github.com/ScarletSC01/tf-vm-standalone.git'
             }
         }
 
@@ -31,23 +22,28 @@ pipeline {
 
         stage('Terraform Plan') {
             steps {
-                sh '/usr/local/bin/terraform plan -var-file=terraform.tfvars'
+                sh """
+                    /usr/local/bin/terraform plan \
+                    -var="credentials_file=$GOOGLE_CREDENTIALS" \
+                    -var-file=terraform.tfvars
+                """
             }
         }
 
         stage('Terraform Apply') {
             steps {
-                sh '/usr/local/bin/terraform apply -auto-approve -var-file=terraform.tfvars'
+                sh """
+                    /usr/local/bin/terraform apply -auto-approve \
+                    -var="credentials_file=$GOOGLE_CREDENTIALS" \
+                    -var-file=terraform.tfvars
+                """
             }
         }
     }
 
     post {
-        success {
-            echo 'Terraform applied successfully ✅'
-        }
         failure {
-            echo 'Ocurrió un error durante la ejecución de Terraform ❌'
+            echo "Ocurrió un error durante la ejecución de Terraform ❌"
         }
     }
 }
