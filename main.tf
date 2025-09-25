@@ -31,7 +31,7 @@ variable "image" {
 
 resource "google_compute_instance" "vm_example" {
   name         = "vm-jenkins-secondary"
-  machine_type = "e2-medium"
+  machine_type = "n1-standard-2"
   zone         = var.zone
 
   boot_disk {
