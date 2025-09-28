@@ -1,55 +1,88 @@
+```groovy
 pipeline {
     agent any
 
+    parameters {
+        choice(
+            name: 'ACTION',
+            choices: ['plan', 'apply', 'destroy'],
+            description: 'Selecciona la acción de Terraform'
+        )
+    }
+
     environment {
-        // Ruta al JSON de credenciales de GCP en la VM
-        GOOGLE_CREDENTIALS = '/var/lib/jenkins/gcp/credentials.json'
+        GOOGLE_APPLICATION_CREDENTIALS = "/var/lib/jenkins/gcp/credentials.json"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/ScarletSC01/tf-vm-standalone.git'
+                git url: 'https://github.com/ScarletSC01/tf-vm-standalone.git', branch: 'main'
             }
         }
 
         stage('Terraform Init') {
             steps {
-                sh '/usr/local/bin/terraform init'
+                sh '''
+                  terraform init \
+                    -var=credentials_file=${GOOGLE_APPLICATION_CREDENTIALS}
+                '''
             }
         }
-stage('Terraform Import VM') {
-    steps {
-        sh 'terraform import google_compute_instance.vm_example projects/jenkins-terraform-demo-472920/zones/us-central1-a/instances/vm-jenkins-secondary || true'
-    }
-}
+
+        stage('Terraform Import VM') {
+            steps {
+                sh '''
+                  terraform import \
+                    -var=credentials_file=${GOOGLE_APPLICATION_CREDENTIALS} \
+                    google_compute_instance.vm_example \
+                    projects/jenkins-terraform-demo-472920/zones/us-central1-a/instances/vm-jenkins-secondary || true
+                '''
+            }
+        }
 
         stage('Terraform Plan') {
+            when {
+                expression { params.ACTION == 'plan' }
+            }
             steps {
-                sh """
-                    /usr/local/bin/terraform plan \
-                    -var="credentials_file=$GOOGLE_CREDENTIALS" \
+                sh '''
+                  terraform plan \
+                    -var=credentials_file=${GOOGLE_APPLICATION_CREDENTIALS} \
                     -var-file=terraform.tfvars
-                """
+                '''
             }
         }
 
         stage('Terraform Apply') {
+            when {
+                expression { params.ACTION == 'apply' }
+            }
+            options {
+                timeout(time: 20, unit: 'MINUTES')
+            }
             steps {
-                sh """
-                    /usr/local/bin/terraform apply -auto-approve \
-                    -var="credentials_file=$GOOGLE_CREDENTIALS" \
+                sh '''
+                  terraform apply -auto-approve \
+                    -var=credentials_file=${GOOGLE_APPLICATION_CREDENTIALS} \
                     -var-file=terraform.tfvars
-                """
+                '''
+            }
+        }
+
+        stage('Terraform Destroy') {
+            when {
+                expression { params.ACTION == 'destroy' }
+            }
+            steps {
+                sh '''
+                  terraform destroy -auto-approve \
+                    -var=credentials_file=${GOOGLE_APPLICATION_CREDENTIALS} \
+                    -var-file=terraform.tfvars
+                '''
             }
         }
     }
-
-    post {
-        failure {
-            echo "Ocurrió un error durante la ejecución de Terraform ❌"
-        }
-    }
 }
+```
 
