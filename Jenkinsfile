@@ -16,27 +16,16 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/ScarletSC01/tf-vm-standalone.git', branch: 'main'
+                git(
+                    url: 'https://github.com/ScarletSC01/tf-vm-standalone.git',
+                    branch: 'main'
+                )
             }
         }
 
         stage('Terraform Init') {
             steps {
-                sh '''
-                  terraform init \
-                    -var=credentials_file=${GOOGLE_APPLICATION_CREDENTIALS}
-                '''
-            }
-        }
-
-        stage('Terraform Import VM') {
-            steps {
-                sh '''
-                  terraform import \
-                    -var=credentials_file=${GOOGLE_APPLICATION_CREDENTIALS} \
-                    google_compute_instance.vm_example \
-                    projects/jenkins-terraform-demo-472920/zones/us-central1-a/instances/vm-jenkins-secondary || true
-                '''
+                sh "terraform init -var=credentials_file=${GOOGLE_APPLICATION_CREDENTIALS}"
             }
         }
 
@@ -45,11 +34,7 @@ pipeline {
                 expression { params.ACTION == 'plan' }
             }
             steps {
-                sh '''
-                  terraform plan \
-                    -var=credentials_file=${GOOGLE_APPLICATION_CREDENTIALS} \
-                    -var-file=terraform.tfvars
-                '''
+                sh "terraform plan -var=credentials_file=${GOOGLE_APPLICATION_CREDENTIALS} -var-file=terraform.tfvars"
             }
         }
 
@@ -61,11 +46,7 @@ pipeline {
                 timeout(time: 20, unit: 'MINUTES')
             }
             steps {
-                sh '''
-                  terraform apply -auto-approve \
-                    -var=credentials_file=${GOOGLE_APPLICATION_CREDENTIALS} \
-                    -var-file=terraform.tfvars
-                '''
+                sh "terraform apply -auto-approve -var=credentials_file=${GOOGLE_APPLICATION_CREDENTIALS} -var-file=terraform.tfvars"
             }
         }
 
@@ -74,13 +55,8 @@ pipeline {
                 expression { params.ACTION == 'destroy' }
             }
             steps {
-                sh '''
-                  terraform destroy -auto-approve \
-                    -var=credentials_file=${GOOGLE_APPLICATION_CREDENTIALS} \
-                    -var-file=terraform.tfvars
-                '''
+                sh "terraform destroy -auto-approve -var=credentials_file=${GOOGLE_APPLICATION_CREDENTIALS} -var-file=terraform.tfvars"
             }
         }
     }
 }
-
