@@ -9,7 +9,7 @@ terraform {
 }
 
 provider "google" {
-  project     = var.project_id
+  project     = jenkins-terraform-demo-472920
   region      = var.region
   credentials = file(var.credentials_file)
 }
