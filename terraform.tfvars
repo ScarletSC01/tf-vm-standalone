@@ -1,7 +1,7 @@
 # terraform.tfvars
 
 # Nombre del proyecto en GCP
-project_id = "tu-proyecto-gcp"
+project_id = "jenkins-terraform-demo-472920"
 
 # Región donde desplegarás la VM
 region     = "us-central1"
