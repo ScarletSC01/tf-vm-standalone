@@ -13,45 +13,39 @@ provider "google" {
   region      = var.region
   credentials = file(var.credentials_file)
 }
-variable "network" {
-  description = "Nombre de la red de GCP"
-  type        = string
+
+# Módulo VM
+module "vm" {
+  source           = "./modules/vm"
+  project_id       = var.project_id
+  region           = var.region
+  zone             = var.zone
+  network          = var.network
+  subnetwork       = var.subnetwork
+  instance_name    = var.instance_name
+  machine_type     = var.machine_type
+  image            = var.image
+  public_key       = var.public_key
+  credentials_file = var.credentials_file
 }
 
-variable "subnetwork" {
-  description = "Nombre de la subred de GCP"
-  type        = string
+# Módulo GKE
+module "gke" {
+  source           = "./modules/gke"
+  project_id       = var.project_id
+  region           = var.region
+  gke_cluster_name = var.gke_cluster_name
+  credentials_file = var.credentials_file
 }
 
-variable "image" {
-  description = "Imagen del sistema operativo para la VM"
-  type        = string
-}
-
-
-resource "google_compute_instance" "vm_example" {
-  name         = "vm-jenkins-secondary"
-  machine_type = "n1-standard-2"
-  zone         = var.zone
-  allow_stopping_for_update = true 
-
-  boot_disk {
-    initialize_params {
-      image = "debian-cloud/debian-12"
-      size  = 20
-    }
-  }
-
-  network_interface {
-    network    = var.network
-    subnetwork = var.subnetwork
-    access_config {}
-  }
-
-  metadata = {
-    ssh-keys = "user=${var.public_key}"
-  }
-
-  tags = ["jenkins-vm"]
+# Módulo CloudSQL
+module "cloudsql" {
+  source           = "./modules/cloudsql"
+  project_id       = var.project_id
+  region           = var.region
+  cloudsql_name    = var.cloudsql_name
+  database_version = var.database_version
+  tier             = var.tier
+  credentials_file = var.credentials_file
 }
 
