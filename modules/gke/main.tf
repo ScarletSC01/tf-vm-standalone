@@ -1,3 +1,8 @@
+provider "google" {
+  project     = var.project_id
+  region      = var.region
+  credentials = file(var.credentials_file)
+}
 resource "google_container_cluster" "primary" {
   name     = var.gke_cluster_name
   location = var.region
