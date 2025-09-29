@@ -3,13 +3,14 @@ provider "google" {
   region      = var.region
   credentials = file(var.credentials_file)
 }
+
 resource "google_sql_database_instance" "postgres" {
   name             = var.cloudsql_name
-  database_version = "POSTGRES_15"
+  database_version = var.database_version
   region           = var.region
 
   settings {
-    tier = "db-f1-micro"
+    tier = var.tier
     ip_configuration {
       ipv4_enabled = true
       authorized_networks {
