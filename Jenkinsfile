@@ -16,12 +16,14 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/ScarletSC01/tf-vm-standalone.git'
             }
         }
+
         stage('Terraform Init') {
             steps {
                 echo "Inicializando Terraform y cargando módulos..."
                 sh 'terraform init -var=credentials_file=$GOOGLE_APPLICATION_CREDENTIALS'
             }
         }
+
         stage('Terraform Plan') {
             when {
                 expression { return params.ACTION == 'plan' }
@@ -31,6 +33,7 @@ pipeline {
                 sh 'terraform plan -var=credentials_file=$GOOGLE_APPLICATION_CREDENTIALS -out=tfplan'
             }
         }
+
         stage('Terraform Apply') {
             when {
                 expression { return params.ACTION == 'apply' }
@@ -40,21 +43,26 @@ pipeline {
                 sh 'terraform apply -auto-approve -var=credentials_file=$GOOGLE_APPLICATION_CREDENTIALS'
             }
         }
+
         stage('Terraform Destroy') {
             when {
                 expression { return params.ACTION == 'destroy' }
             }
             steps {
+                echo "Desactivando deletion_protection antes del destroy..."
+                sh """
+                terraform apply -auto-approve -var=credentials_file=$GOOGLE_APPLICATION_CREDENTIALS -var='deletion_protection=false'
+                """
                 echo "Destruyendo todos los recursos Terraform: VM, GKE y CloudSQL..."
                 sh 'terraform destroy -auto-approve -var=credentials_file=$GOOGLE_APPLICATION_CREDENTIALS'
             }
         }
     }
+
     post {
         always {
             echo 'Pipeline finalizado'
         }
     }
 }
-
 
