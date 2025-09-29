@@ -1,15 +1,22 @@
-variable "project_id" {}
-variable "region" {}
-variable "instance_name" {}
-variable "database_version" {}
-variable "tier" {}
-
-resource "google_sql_database_instance" "postgres_instance" {
-  name             = var.instance_name
+resource "google_sql_database_instance" "postgres" {
+  name             = var.cloudsql_name
+  database_version = "POSTGRES_15"
   region           = var.region
-  database_version = var.database_version
 
   settings {
-    tier = var.tier
+    tier = "db-f1-micro"
+    ip_configuration {
+      ipv4_enabled = true
+      authorized_networks {
+        name  = "all"
+        value = "0.0.0.0/0"
+      }
+    }
   }
+}
+
+resource "google_sql_user" "postgres_user" {
+  name     = "admin"
+  instance = google_sql_database_instance.postgres.name
+  password = "1234"
 }
