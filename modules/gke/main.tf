@@ -14,6 +14,7 @@ resource "google_container_cluster" "primary" {
   node_config {
     machine_type = "e2-medium"
     oauth_scopes = ["https://www.googleapis.com/auth/cloud-platform"]
+    disk_size_gb = 100
   }
 }
 
@@ -21,11 +22,12 @@ resource "google_container_node_pool" "primary_nodes" {
   name       = "primary-nodes"
   location   = var.region
   cluster    = google_container_cluster.primary.name
-  node_count = 2
+  node_count = 1
 
   node_config {
     machine_type = "e2-medium"
     oauth_scopes = ["https://www.googleapis.com/auth/cloud-platform"]
+    disk_size_gb = 100
   }
 }
 
