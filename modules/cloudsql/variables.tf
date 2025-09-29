@@ -14,12 +14,12 @@ variable "cloudsql_name" {
 }
 
 variable "database_version" {
-  description = "Versión de la base de datos"
+  description = "Versión de la base de datos (POSTGRES_15, etc.)"
   type        = string
 }
 
 variable "tier" {
-  description = "Tier de la instancia"
+  description = "Tier de la instancia CloudSQL"
   type        = string
 }
 
