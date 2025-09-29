@@ -3,26 +3,18 @@ variable "region" {}
 variable "zone" {}
 variable "network" {}
 variable "subnetwork" {}
-variable "instance_name" {}
-variable "machine_type" {}
-variable "image" {}
+variable "credentials_file" {}
 variable "public_key" {}
 
-provider "google" {
-  project     = var.project_id
-  region      = var.region
-  credentials = file(var.credentials_file)
-}
-
 resource "google_compute_instance" "vm_example" {
-  name         = var.instance_name
-  machine_type = var.machine_type
+  name         = "vm-jenkins-secondary"
+  machine_type = "n1-standard-2"
   zone         = var.zone
   allow_stopping_for_update = true
 
   boot_disk {
     initialize_params {
-      image = var.image
+      image = "debian-cloud/debian-12"
       size  = 20
     }
   }
