@@ -1,62 +1,38 @@
 pipeline {
     agent any
-
-    parameters {
-        choice(
-            name: 'ACTION',
-            choices: ['plan', 'apply', 'destroy'],
-            description: 'Selecciona la acción de Terraform'
-        )
-    }
-
     environment {
-        GOOGLE_APPLICATION_CREDENTIALS = "/var/lib/jenkins/gcp/credentials.json"
+        GOOGLE_APPLICATION_CREDENTIALS = '/var/lib/jenkins/gcp/credentials.json'
     }
-
     stages {
         stage('Checkout') {
             steps {
-                git(
-                    url: 'https://github.com/ScarletSC01/tf-vm-standalone.git',
-                    branch: 'main'
-                )
+                git branch: 'main', url: 'https://github.com/ScarletSC01/tf-vm-standalone.git'
             }
         }
-
         stage('Terraform Init') {
             steps {
-                sh "terraform init -var=credentials_file=${GOOGLE_APPLICATION_CREDENTIALS}"
+                sh 'terraform init -var=credentials_file=$GOOGLE_APPLICATION_CREDENTIALS'
             }
         }
-
         stage('Terraform Plan') {
-            when {
-                expression { params.ACTION == 'plan' }
-            }
             steps {
-                sh "terraform plan -var=credentials_file=${GOOGLE_APPLICATION_CREDENTIALS} -var-file=terraform.tfvars"
+                sh 'terraform plan -var=credentials_file=$GOOGLE_APPLICATION_CREDENTIALS -out=tfplan'
             }
         }
-
         stage('Terraform Apply') {
-            when {
-                expression { params.ACTION == 'apply' }
-            }
-            options {
-                timeout(time: 20, unit: 'MINUTES')
-            }
             steps {
-                sh "terraform apply -auto-approve -var=credentials_file=${GOOGLE_APPLICATION_CREDENTIALS} -var-file=terraform.tfvars"
+                sh 'terraform apply -auto-approve -var=credentials_file=$GOOGLE_APPLICATION_CREDENTIALS'
             }
         }
-
         stage('Terraform Destroy') {
             when {
-                expression { params.ACTION == 'destroy' }
+                expression { return params.DESTROY == true }
             }
             steps {
-                sh "terraform destroy -auto-approve -var=credentials_file=${GOOGLE_APPLICATION_CREDENTIALS} -var-file=terraform.tfvars"
+                sh 'terraform destroy -auto-approve -var=credentials_file=$GOOGLE_APPLICATION_CREDENTIALS'
             }
         }
     }
 }
+
+
