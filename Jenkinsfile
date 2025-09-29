@@ -1,7 +1,11 @@
 pipeline {
     agent any
     parameters {
-        booleanParam(name: 'DESTROY', defaultValue: false, description: 'Marcar true para destruir todos los recursos')
+        choice(
+            name: 'ACTION',
+            choices: ['plan', 'apply', 'destroy'],
+            description: 'Selecciona la acción de Terraform a ejecutar'
+        )
     }
     environment {
         GOOGLE_APPLICATION_CREDENTIALS = '/var/lib/jenkins/gcp/credentials.json'
@@ -14,43 +18,43 @@ pipeline {
         }
         stage('Terraform Init') {
             steps {
+                echo "Inicializando Terraform y cargando módulos..."
                 sh 'terraform init -var=credentials_file=$GOOGLE_APPLICATION_CREDENTIALS'
             }
         }
         stage('Terraform Plan') {
+            when {
+                expression { return params.ACTION == 'plan' }
+            }
             steps {
-                script {
-                    if (!params.DESTROY) {
-                        sh 'terraform plan -var=credentials_file=$GOOGLE_APPLICATION_CREDENTIALS -out=tfplan'
-                    } else {
-                        echo "Skipping plan because DESTROY is true"
-                    }
-                }
+                echo "Generando plan de Terraform para todos los módulos (vm, gke, cloudsql)..."
+                sh 'terraform plan -var=credentials_file=$GOOGLE_APPLICATION_CREDENTIALS -out=tfplan'
             }
         }
         stage('Terraform Apply') {
             when {
-                expression { return !params.DESTROY }
+                expression { return params.ACTION == 'apply' }
             }
             steps {
+                echo "Aplicando Terraform: creando VM, GKE y CloudSQL..."
                 sh 'terraform apply -auto-approve -var=credentials_file=$GOOGLE_APPLICATION_CREDENTIALS'
             }
         }
         stage('Terraform Destroy') {
             when {
-                expression { return params.DESTROY }
+                expression { return params.ACTION == 'destroy' }
             }
             steps {
+                echo "Destruyendo todos los recursos Terraform: VM, GKE y CloudSQL..."
                 sh 'terraform destroy -auto-approve -var=credentials_file=$GOOGLE_APPLICATION_CREDENTIALS'
             }
         }
     }
     post {
         always {
-            echo 'Pipeline finished'
+            echo 'Pipeline finalizado'
         }
     }
 }
-
 
 
