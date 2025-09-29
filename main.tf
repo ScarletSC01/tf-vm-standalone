@@ -26,7 +26,7 @@ module "vm" {
   instance_name = "jenkins-vm2"
   machine_type  = "e2-medium"
   image         = "debian-cloud/debian-12"
-  public_key    = file("~/.ssh/id_rsa.pub")
+  public_key    = file("/var/lib/jenkins/.ssh/id_rsa.pub")
   network_id    = module.network.jenkins_network.id
   subnetwork_id = module.network.jenkins_subnet.id
   credentials_file = var.credentials_file
