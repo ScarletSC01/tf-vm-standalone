@@ -27,8 +27,8 @@ module "vm" {
   machine_type  = "e2-medium"
   image         = "debian-cloud/debian-12"
   public_key    = file("/var/lib/jenkins/.ssh/id_rsa.pub")
-  network_id    = module.network.jenkins_network.id
-  subnetwork_id = module.network.jenkins_subnet.id
+  network_id    = module.network.network_id      # Ahora coincide con el output
+  subnetwork_id = module.network.subnetwork_id
   credentials_file = var.credentials_file
 
   depends_on = [module.network]
