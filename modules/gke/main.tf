@@ -14,7 +14,7 @@ resource "google_container_cluster" "primary" {
   node_config {
     machine_type = "e2-medium"
     oauth_scopes = ["https://www.googleapis.com/auth/cloud-platform"]
-    disk_size_gb = 100
+    disk_size_gb = 50
   }
 }
 
