@@ -1,3 +1,7 @@
+provider "google" {
+  project     = var.project_id
+  credentials = file(var.credentials_file)
+}
 resource "google_sql_database_instance" "postgres" {
   name             = var.cloudsql_name
   database_version = "POSTGRES_15"
