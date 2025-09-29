@@ -10,6 +10,7 @@ resource "google_container_cluster" "primary" {
 
   remove_default_node_pool = true
   initial_node_count       = 1
+  deletion_protection = false
 
   node_config {
     machine_type = "e2-medium"
