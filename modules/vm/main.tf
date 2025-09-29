@@ -18,10 +18,10 @@ resource "google_compute_instance" "vm_example" {
   }
 
   network_interface {
-    network    = var.network
-    subnetwork = var.subnetwork
-    access_config {}
-  }
+  network    = var.network_id       # ahora pasamos el ID de la red
+  subnetwork = var.subnetwork_id    # ahora pasamos el ID de la subred
+  access_config {}
+}
 
   metadata = {
     ssh-keys = "user=${var.public_key}"
