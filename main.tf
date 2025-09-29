@@ -13,20 +13,28 @@ provider "google" {
   region      = var.region
   credentials = file(var.credentials_file)
 }
+module "network" {
+  source = "./modules/network"
+  region = var.region
+}
 
 module "vm" {
   source        = "./modules/vm"
   project_id    = var.project_id
   region        = var.region
   zone          = var.zone
-  instance_name = var.instance_name
-  machine_type  = var.machine_type
-  image         = var.image
-  network       = var.network
-  subnetwork    = var.subnetwork
-  public_key    = var.public_key
+  instance_name = "jenkins-vm2"
+  machine_type  = "e2-medium"
+  image         = "debian-cloud/debian-12"
+  public_key    = file("~/.ssh/id_rsa.pub")
+  network_id    = module.network.jenkins_network.id
+  subnetwork_id = module.network.jenkins_subnet.id
   credentials_file = var.credentials_file
+
+  depends_on = [module.network]
 }
+
+
 
 module "gke" {
   source        = "./modules/gke"
