@@ -28,15 +28,14 @@ variable "image" {
   type        = string
 }
 
-variable "network" {
-  description = "Red de la VM"
-  type        = string
+variable "network_id" {
+  type = string
 }
 
-variable "subnetwork" {
-  description = "Subred de la VM"
-  type        = string
+variable "subnetwork_id" {
+  type = string
 }
+
 
 variable "public_key" {
   description = "Clave pública SSH"
