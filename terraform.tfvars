@@ -26,4 +26,4 @@ gke_cluster_name = "gke-cluster-demo"
 cloudsql_name     = "cloudsql-postgres-demo"
 database_version  = "POSTGRES_15"
 tier              = "db-f1-micro"
-region           = "us-central1"
+
