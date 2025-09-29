@@ -4,10 +4,10 @@
 project_id = "jenkins-terraform-demo-472920"
 
 # Región donde desplegarás los recursos
-region     = "us-central1"
+region     = "us-east1"
 
 # Zona dentro de la región
-zone       = "us-central1-a"
+zone       = "us-east1-b"
 
 # VM 
 instance_name = "vm-jenkins-secondary"
