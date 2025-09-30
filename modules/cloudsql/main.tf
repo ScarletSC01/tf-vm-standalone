@@ -8,6 +8,7 @@ resource "google_sql_database_instance" "postgres" {
   name             = var.cloudsql_name
   database_version = var.database_version
   region           = var.region
+  deletion_protection = false 
 
   settings {
     tier = var.tier
