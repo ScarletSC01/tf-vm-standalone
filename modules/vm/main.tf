@@ -4,6 +4,8 @@ resource "google_compute_instance" "vm_example" {
   machine_type = var.machine_type
   zone         = var.zone
   allow_stopping_for_update = true
+  deletion_protection = false
+  
 
   boot_disk {
     initialize_params {
